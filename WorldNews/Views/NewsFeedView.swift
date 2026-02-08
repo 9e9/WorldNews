@@ -33,6 +33,7 @@ enum NewsCategory: String, CaseIterable, Identifiable {
 
 struct NewsFeedView: View {
     @StateObject private var viewModel = NewsFeedViewModel()
+    @Environment(\.colorScheme) private var colorScheme
     @State private var searchText: String = "세계 뉴스"
     @State private var selectedCategory: NewsCategory = .전체
     @State private var selectedURL: String? = nil
@@ -41,106 +42,106 @@ struct NewsFeedView: View {
     var body: some View {
         NavigationStack {
             VStack (spacing: 5) {
+                // MARK: -헤더
+                HStack {
+                    Text("뉴스 피드")
+                        .font(.largeTitle)
+                        .padding(.leading)
+                        .bold()
+                    Spacer()
+                }
+                // MARK: -카테고리 선택 및 뉴스 리스트
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(NewsCategory.allCases) { category in
+                            Button(action: {
+                                selectedCategory = category
+                                searchText = category.query
+                                viewModel.fetchNews(query: searchText)
+                            }) {
+                                Text(category.rawValue)
+                                    .padding(.vertical, 6)
+                                    .padding(.horizontal, 16)
+                                    .background(selectedCategory == category ? Color.blue : Color.gray.opacity(0.2))
+                                    .foregroundColor(selectedCategory == category ? .white : .primary)
+                                    .cornerRadius(16)
+                            }
+                        }
+                    }
+                    .padding(.horizontal)
+                }
+                Spacer(minLength: 0)
                 
-// MARK: -헤더
-                VStack (spacing: 5) {
-                    HStack {
-                        Text("뉴스 홈")
-                            .font(.largeTitle)
-                            .padding(.leading)
-                            .bold()
-                        Spacer()
-                    }
-// MARK: -카테고리 선택 및 뉴스 리스트
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 12) {
-                            ForEach(NewsCategory.allCases) { category in
-                                Button(action: {
-                                    selectedCategory = category
-                                    searchText = category.query
-                                    viewModel.fetchNews(query: searchText)
-                                }) {
-                                    Text(category.rawValue)
-                                        .padding(.vertical, 6)
-                                        .padding(.horizontal, 16)
-                                        .background(selectedCategory == category ? Color.blue : Color.gray.opacity(0.2))
-                                        .foregroundColor(selectedCategory == category ? .white : .primary)
-                                        .cornerRadius(16)
-                                }
-                            }
-                        }
-                        .padding(.horizontal)
-                    }
-                    Spacer(minLength: 0)
-                    
-// MARK: -뉴스 피드
-                    if viewModel.isLoading {
-                        ProgressView("로딩 중...")
-                            .padding()
-                    } else if let error = viewModel.errorMessage {
-                        Text(error)
-                            .foregroundColor(.red)
-                            .padding()
-                    } else {
-                        ScrollView (showsIndicators: false) {
-                            LazyVStack(spacing: 16) {
-                                ForEach(viewModel.articles) { article in
-                                    VStack(alignment: .leading, spacing: 8) {
-                                        Text(article.displayTitle)
-                                            .font(.headline)
-                                        Text(article.displayDescription)
-                                            .font(.subheadline)
-                                            .foregroundColor(.secondary)
-                                        if let url = URL(string: article.link) {
-                                            NavigationLink(
-                                                destination: ArticleView(url: url),
-                                                label: {
-                                                    Text("원문 보기")
-                                                        .font(.caption)
-                                                        .foregroundColor(.blue)
-                                                }
-                                            )
-                                        }
-                                        Text(article.displayDate)
-                                            .font(.caption2)
-                                            .foregroundColor(.gray)
-                                    }
-                                    .padding()
-                                    .background(Color.gray.opacity(0.4))
-                                    .cornerRadius(8)
-                                    .frame(maxWidth: .infinity , alignment: .leading)
-                                    .onAppear {
-                                        // 마지막 아이템에 도달하면 다음 페이지 로드 (무한 스크롤)
-                                        // 중복 호출 방지
-                                        if article.id == viewModel.articles.last?.id,
-                                           article.id != lastTriggeredId {
-                                            lastTriggeredId = article.id
-                                            // 0.3초 디바운싱으로 CPU 부하 감소
-                                            Task {
-                                                try? await Task.sleep(nanoseconds: 300_000_000)
-                                                viewModel.loadMoreNews()
+                // MARK: -뉴스 피드
+                if viewModel.isLoading {
+                    ProgressView("로딩 중...")
+                        .padding()
+                } else if let error = viewModel.errorMessage {
+                    Text(error)
+                        .foregroundColor(.red)
+                        .padding()
+                } else {
+                    ScrollView (showsIndicators: false) {
+                        LazyVStack(spacing: 16) {
+                            ForEach(viewModel.articles) { article in
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text(article.displayTitle)
+                                        .font(.headline)
+                                    Text(article.displayDescription)
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                    if let url = URL(string: article.link) {
+                                        NavigationLink(
+                                            destination: ArticleView(url: url),
+                                            label: {
+                                                Text("원문 보기")
+                                                    .font(.caption)
+                                                    .foregroundColor(.blue)
                                             }
+                                        )
+                                    }
+                                    Text(article.displayDate)
+                                        .font(.caption2)
+                                        .foregroundColor(.gray)
+                                }
+                                .padding()
+                                .background(colorScheme == .dark ?
+                                    Color(UIColor.secondarySystemGroupedBackground) : Color.white
+                                )
+                                .cornerRadius(8)
+                                .frame(maxWidth: .infinity , alignment: .leading)
+                                .onAppear {
+                                    // 마지막 아이템에 도달하면 다음 페이지 로드 (무한 스크롤)
+                                    // 중복 호출 방지
+                                    if article.id == viewModel.articles.last?.id,
+                                       article.id != lastTriggeredId {
+                                        lastTriggeredId = article.id
+                                        // 0.3초 디바운싱으로 CPU 부하 감소
+                                        Task {
+                                            try? await Task.sleep(nanoseconds: 300_000_000)
+                                            viewModel.loadMoreNews()
                                         }
                                     }
                                 }
-                                
-                                // 더 불러오는 중 표시
-                                if viewModel.isLoadingMore {
-                                    ProgressView()
-                                        .padding()
-                                }
                             }
-                            .padding()
+                            
+                            // 더 불러오는 중 표시
+                            if viewModel.isLoadingMore {
+                                ProgressView()
+                                    .padding()
+                            }
                         }
-                        .refreshable {
-                            // Pull to Refresh
-                            await refreshNews()
-                        }
+                        .padding()
+                    }
+                    .refreshable {
+                        // Pull to Refresh
+                        await refreshNews()
                     }
                 }
-                .onAppear {
-                    viewModel.fetchNews(query: searchText)
-                }
+            }
+            .background(Color(UIColor.systemGroupedBackground))
+            .onAppear {
+                viewModel.fetchNews(query: searchText)
             }
         }
     }

@@ -6,6 +6,12 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		F478A81C2F3920FF00C59168 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = F478A81B2F3920FF00C59168 /* FirebaseCore */; };
+		F478A81E2F3920FF00C59168 /* FirebaseFunctions in Frameworks */ = {isa = PBXBuildFile; productRef = F478A81D2F3920FF00C59168 /* FirebaseFunctions */; };
+		F478A8232F39281600C59168 /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = F478A8222F39281600C59168 /* FirebaseRemoteConfig */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		F43B5BB12F38E88D00E56268 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +58,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F478A8232F39281600C59168 /* FirebaseRemoteConfig in Frameworks */,
+				F478A81C2F3920FF00C59168 /* FirebaseCore in Frameworks */,
+				F478A81E2F3920FF00C59168 /* FirebaseFunctions in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,6 +87,7 @@
 				F43B5BA32F38E88A00E56268 /* WorldNews */,
 				F43B5BB32F38E88D00E56268 /* WorldNewsTests */,
 				F43B5BBD2F38E88D00E56268 /* WorldNewsUITests */,
+				F478A8212F39281600C59168 /* Frameworks */,
 				F43B5BA22F38E88A00E56268 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -90,6 +100,13 @@
 				F43B5BBA2F38E88D00E56268 /* WorldNewsUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		F478A8212F39281600C59168 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -112,6 +129,9 @@
 			);
 			name = WorldNews;
 			packageProductDependencies = (
+				F478A81B2F3920FF00C59168 /* FirebaseCore */,
+				F478A81D2F3920FF00C59168 /* FirebaseFunctions */,
+				F478A8222F39281600C59168 /* FirebaseRemoteConfig */,
 			);
 			productName = WorldNews;
 			productReference = F43B5BA12F38E88A00E56268 /* WorldNews.app */;
@@ -195,6 +215,9 @@
 			);
 			mainGroup = F43B5B982F38E88A00E56268;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				F478A81A2F3920FF00C59168 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = F43B5BA22F38E88A00E56268 /* Products */;
 			projectDirPath = "";
@@ -570,6 +593,35 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		F478A81A2F3920FF00C59168 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		F478A81B2F3920FF00C59168 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F478A81A2F3920FF00C59168 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		F478A81D2F3920FF00C59168 /* FirebaseFunctions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F478A81A2F3920FF00C59168 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFunctions;
+		};
+		F478A8222F39281600C59168 /* FirebaseRemoteConfig */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F478A81A2F3920FF00C59168 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseRemoteConfig;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = F43B5B992F38E88A00E56268 /* Project object */;
 }
