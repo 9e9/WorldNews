@@ -13,13 +13,6 @@ struct SettingView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                HStack {
-                    Text("설정")
-                        .font(.largeTitle)
-                        .padding(.leading)
-                        .bold()
-                    Spacer()
-                }
                 Form {
                     Section(header: Text("화면 모드")) {
                         Picker("화면 모드", selection: $appearanceMode) {
@@ -31,6 +24,7 @@ struct SettingView: View {
                     }
                 }
             }
+            .navigationTitle("설정")
             .background(Color(UIColor.systemGroupedBackground))
         }
     }

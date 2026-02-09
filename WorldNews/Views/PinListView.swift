@@ -17,7 +17,13 @@ struct PinListView: View {
                     .bold()
                 Spacer()
             }
-            Spacer()
+            .navigationTitle("핀 고정")
+            .navigationBarTitleDisplayMode(.large)
         }
     }
+}
+
+// MARK: - Preview
+#Preview {
+    PinListView()
 }

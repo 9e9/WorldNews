@@ -42,36 +42,6 @@ struct NewsFeedView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 5) {
-                // MARK: -헤더
-                /*HStack {
-                    Text("뉴스 피드")
-                        .font(.largeTitle)
-                        .padding(.leading)
-                        .bold()
-                    Spacer()
-                }*/
-                // MARK: -카테고리 선택 및 뉴스 리스트
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 12) {
-                        ForEach(NewsCategory.allCases) { category in
-                            Button(action: {
-                                selectedCategory = category
-                                searchText = category.query
-                                viewModel.fetchNews(query: searchText)
-                            }) {
-                                Text(category.rawValue)
-                                    .padding(.vertical, 6)
-                                    .padding(.horizontal, 16)
-                                    .background(selectedCategory == category ? Color.blue : Color.gray.opacity(0.2))
-                                    .foregroundColor(selectedCategory == category ? .white : .primary)
-                                    .cornerRadius(16)
-                            }
-                        }
-                    }
-                    .padding(.horizontal)
-                }
-                Spacer(minLength: 0)
-                
                 // MARK: -뉴스 피드
                 if viewModel.isLoading {
                     ProgressView("로딩 중...")
@@ -82,6 +52,28 @@ struct NewsFeedView: View {
                         .padding()
                 } else {
                     ScrollView(showsIndicators: false) {
+                        // MARK: -카테고리 선택 및 뉴스 리스트
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 12) {
+                                ForEach(NewsCategory.allCases) { category in
+                                    Button(action: {
+                                        selectedCategory = category
+                                        searchText = category.query
+                                        viewModel.fetchNews(query: searchText)
+                                    }) {
+                                        Text(category.rawValue)
+                                            .padding(.vertical, 6)
+                                            .padding(.horizontal, 16)
+                                            .background(selectedCategory == category ? Color.blue : Color.gray.opacity(0.2))
+                                            .foregroundColor(selectedCategory == category ? .white : .primary)
+                                            .cornerRadius(16)
+                                    }
+                                }
+                            }
+                            .padding(.horizontal)
+                        }
+                        Spacer(minLength: 0)
+                        
                         LazyVStack(spacing: 16) {
                             ForEach(viewModel.articles) { article in
                                 VStack(alignment: .leading, spacing: 8) {
@@ -139,7 +131,7 @@ struct NewsFeedView: View {
                     }
                 }
             }
-            .navigationTitle("뉴스 피드")
+            .navigationTitle("News 피드")
             .navigationBarTitleDisplayMode(.large)
             .background(Color(UIColor.systemGroupedBackground))
             .onAppear {
