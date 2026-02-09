@@ -41,15 +41,15 @@ struct NewsFeedView: View {
     
     var body: some View {
         NavigationStack {
-            VStack (spacing: 5) {
+            VStack(spacing: 5) {
                 // MARK: -헤더
-                HStack {
+                /*HStack {
                     Text("뉴스 피드")
                         .font(.largeTitle)
                         .padding(.leading)
                         .bold()
                     Spacer()
-                }
+                }*/
                 // MARK: -카테고리 선택 및 뉴스 리스트
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 12) {
@@ -81,7 +81,7 @@ struct NewsFeedView: View {
                         .foregroundColor(.red)
                         .padding()
                 } else {
-                    ScrollView (showsIndicators: false) {
+                    ScrollView(showsIndicators: false) {
                         LazyVStack(spacing: 16) {
                             ForEach(viewModel.articles) { article in
                                 VStack(alignment: .leading, spacing: 8) {
@@ -106,7 +106,7 @@ struct NewsFeedView: View {
                                 }
                                 .padding()
                                 .background(colorScheme == .dark ?
-                                    Color(UIColor.secondarySystemGroupedBackground) : Color.white
+                                            Color(UIColor.secondarySystemGroupedBackground) : Color.white
                                 )
                                 .cornerRadius(8)
                                 .frame(maxWidth: .infinity , alignment: .leading)
@@ -139,6 +139,8 @@ struct NewsFeedView: View {
                     }
                 }
             }
+            .navigationTitle("뉴스 피드")
+            .navigationBarTitleDisplayMode(.large)
             .background(Color(UIColor.systemGroupedBackground))
             .onAppear {
                 viewModel.fetchNews(query: searchText)
