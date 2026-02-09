@@ -32,7 +32,7 @@ enum NewsCategory: String, CaseIterable, Identifiable {
 }
 
 struct NewsFeedView: View {
-    @StateObject private var viewModel = NewsFeedViewModel()
+    @ObservedObject var viewModel: NewsFeedViewModel
     @Environment(\.colorScheme) private var colorScheme
     @State private var searchText: String = "세계 뉴스"
     @State private var selectedCategory: NewsCategory = .전체
@@ -111,11 +111,18 @@ struct NewsFeedView: View {
                             .listRowBackground(Color.clear)
                             .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                                 Button {
-                                    print("핀 고정: \(article.displayTitle)")
+                                    if viewModel.isPinned(article) {
+                                        viewModel.deletePinArticle(article)
+                                    } else {
+                                        viewModel.addPinArticle(article)
+                                    }
                                 } label: {
-                                    Label("", systemImage: "pin.fill")
+                                    Label(
+                                        viewModel.isPinned(article) ? "핀 해제" : "핀 고정",
+                                        systemImage: viewModel.isPinned(article) ? "pin.slash.fill" : "pin.fill"
+                                    )
                                 }
-                                .tint(.orange)
+                                .tint(viewModel.isPinned(article) ? .gray : .orange)
                             }
                             .onAppear {
                                 if article.id == viewModel.articles.last?.id,

@@ -8,6 +8,7 @@
 import Foundation
 import Combine
 import FirebaseRemoteConfig
+import SwiftData
 
 // MARK: - 표시용 뉴스 아이템 (ViewModel)
 struct NewsArticleViewModel: Identifiable {
@@ -23,6 +24,15 @@ struct NewsArticleViewModel: Identifiable {
         self.displayDescription = Self.cleanHTML(article.description)
         self.displayDate = Self.formatDate(article.pubDate)
         self.link = article.link
+    }
+    
+    // SwiftData PinnedArticle로부터 생성
+    init(from pinnedArticle: PinnedArticle) {
+        self.id = UUID(uuidString: pinnedArticle.id) ?? UUID()
+        self.displayTitle = pinnedArticle.displayTitle
+        self.displayDescription = pinnedArticle.displayDescription
+        self.displayDate = pinnedArticle.displayDate
+        self.link = pinnedArticle.link
     }
     
 // MARK: - HTML 정리 (태그 제거 + 엔티티 디코딩)
@@ -66,9 +76,13 @@ struct NewsArticleViewModel: Identifiable {
 class NewsFeedViewModel: ObservableObject {
     // MARK: - Published Properties
     @Published var articles: [NewsArticleViewModel] = []
+    @Published var pinnedArticles: [NewsArticleViewModel] = []
     @Published var isLoading: Bool = false
     @Published var isLoadingMore: Bool = false
     @Published var errorMessage: String? = nil
+    
+    // MARK: - SwiftData Context
+    private var modelContext: ModelContext?
     
     // MARK: - Private Properties
     private var clientId: String = ""
@@ -85,6 +99,12 @@ class NewsFeedViewModel: ObservableObject {
     // MARK: - Initialization
     init() {
         setupRemoteConfig()
+    }
+    
+    // MARK: - SwiftData 설정
+    func setModelContext(_ context: ModelContext) {
+        self.modelContext = context
+        loadPinnedArticles()
     }
     
     // MARK: - Remote Config 설정
@@ -156,6 +176,92 @@ class NewsFeedViewModel: ObservableObject {
         
         currentStart += displayCount
         loadNews(isRefresh: false)
+    }
+    
+    func addPinArticle(_ article: NewsArticleViewModel) {
+        guard let context = modelContext else {
+            print("❌ ModelContext가 설정되지 않았습니다.")
+            return
+        }
+        
+        // UUID를 문자열로 변환 (Predicate 매크로는 복잡한 체이닝 미지원)
+        let articleIdString = article.id.uuidString
+        
+        // 중복 방지
+        let fetchDescriptor = FetchDescriptor<PinnedArticle>(
+            predicate: #Predicate { $0.id == articleIdString }
+        )
+        
+        do {
+            if let existing = try context.fetch(fetchDescriptor).first {
+                print("⚠️ 이미 핀된 기사입니다.")
+                return
+            }
+            
+            let pinnedArticle = PinnedArticle(
+                id: article.id.uuidString,
+                displayTitle: article.displayTitle,
+                displayDescription: article.displayDescription,
+                displayDate: article.displayDate,
+                link: article.link
+            )
+            
+            context.insert(pinnedArticle)
+            try context.save()
+            loadPinnedArticles()
+            print("✅ 핀 추가: \(article.displayTitle)")
+        } catch {
+            print("❌ 핀 저장 실패: \(error.localizedDescription)")
+        }
+    }
+    
+    func deletePinArticle(_ article: NewsArticleViewModel) {
+        guard let context = modelContext else {
+            print("❌ ModelContext가 설정되지 않았습니다.")
+            return
+        }
+        
+        // UUID를 문자열로 변환 (Predicate 매크로는 복잡한 체이닝 미지원)
+        let articleIdString = article.id.uuidString
+        
+        let fetchDescriptor = FetchDescriptor<PinnedArticle>(
+            predicate: #Predicate { $0.id == articleIdString }
+        )
+        
+        do {
+            if let pinnedArticle = try context.fetch(fetchDescriptor).first {
+                context.delete(pinnedArticle)
+                try context.save()
+                loadPinnedArticles()
+                print("✅ 핀 삭제: \(article.displayTitle)")
+            }
+        } catch {
+            print("❌ 핀 삭제 실패: \(error.localizedDescription)")
+        }
+    }
+    
+    // MARK: - Pin Helper Methods
+    
+    /// 핀 여부 확인
+    func isPinned(_ article: NewsArticleViewModel) -> Bool {
+        return pinnedArticles.contains(where: { $0.id == article.id })
+    }
+    
+    /// SwiftData에서 핀 목록 로드
+    private func loadPinnedArticles() {
+        guard let context = modelContext else { return }
+        
+        let fetchDescriptor = FetchDescriptor<PinnedArticle>(
+            sortBy: [SortDescriptor(\.pinnedAt, order: .reverse)]
+        )
+        
+        do {
+            let pins = try context.fetch(fetchDescriptor)
+            pinnedArticles = pins.map { NewsArticleViewModel(from: $0) }
+            print("📂 핀 불러오기 완료: \(pinnedArticles.count)개")
+        } catch {
+            print("❌ 핀 불러오기 실패: \(error.localizedDescription)")
+        }
     }
     
     // MARK: - Private Helpers

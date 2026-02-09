@@ -12,19 +12,23 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.colorScheme) private var systemColorScheme
     @AppStorage("appearanceMode") private var appearanceMode: AppearanceMode = .system
+    @StateObject private var viewModel = NewsFeedViewModel()
     
     var body: some View {
         TabView {
-            NewsFeedView()
+            NewsFeedView(viewModel: viewModel)
                 .tabItem { Label("", systemImage: "newspaper") }
             
-            PinListView()
+            PinListView(viewModel: viewModel)
                 .tabItem { Label("", systemImage: "pin") }
             
             SettingView()
                 .tabItem { Label("", systemImage: "gearshape") }
         }
         .preferredColorScheme(colorScheme)
+        .onAppear {
+            viewModel.setModelContext(modelContext)
+        }
     }
     
     private var colorScheme: ColorScheme? {
