@@ -9,16 +9,13 @@ import SwiftUI
 
 struct PinListView: View {
     var body: some View {
-        VStack {
-            HStack {
-                Text("핀 목록")
-                    .font(.largeTitle)
-                    .padding(.leading)
-                    .bold()
-                Spacer()
+        NavigationStack {
+            VStack {
+                Text("즐겨찾기한 기사가 없습니다.")
+                    
             }
-            .navigationTitle("핀 고정")
-            .navigationBarTitleDisplayMode(.large)
+            .navigationTitle("즐겨찾기")
+            .navigationBarTitleDisplayMode(.automatic)
         }
     }
 }
